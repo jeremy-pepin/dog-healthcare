@@ -41,6 +41,9 @@ struct DashboardView: View {
                             )
                         }
 
+                        // Rappels urgents (en retard ou ≤ 7 jours)
+                        UrgentRemindersCard(dog: dog)
+
                         // Événements à venir
                         UpcomingEventsCard(dog: dog)
 
@@ -210,6 +213,89 @@ struct MiniReminderCard: View {
             if let r = reminder {
                 Text("\(title) — prochain dans \(r.intervalDays) jours")
             }
+        }
+    }
+}
+
+// MARK: - Rappels urgents
+
+struct UrgentRemindersCard: View {
+    let dog: Dog
+    @Environment(\.modelContext) private var context
+    @State private var viewModel = RemindersViewModel()
+
+    private var urgentReminders: [Reminder] {
+        viewModel.sortedReminders(for: dog).filter { reminder in
+            guard let days = reminder.daysRemaining else { return false }
+            let excluded: Set<ReminderType> = [.deworming, .antiParasite]
+            return days <= 7 && !excluded.contains(reminder.reminderType)
+        }
+    }
+
+    var body: some View {
+        if !urgentReminders.isEmpty {
+            let topColor = Color.reminderColor(daysRemaining: urgentReminders.first?.daysRemaining ?? 0)
+            GlassCard(tint: topColor) {
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeader(title: "Rappels à venir")
+
+                    ForEach(urgentReminders, id: \.notificationID) { reminder in
+                        UrgentReminderRow(reminder: reminder, onMarkDone: {
+                            viewModel.markAsDone(reminder, context: context)
+                        })
+
+                        if reminder.notificationID != urgentReminders.last?.notificationID {
+                            Divider()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct UrgentReminderRow: View {
+    let reminder: Reminder
+    let onMarkDone: () -> Void
+    @State private var showConfirm = false
+
+    private var accentColor: Color {
+        .reminderColor(daysRemaining: reminder.daysRemaining)
+    }
+
+    var body: some View {
+        Button { showConfirm = true } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(accentColor.opacity(0.15))
+                        .frame(width: 38, height: 38)
+                    Image(systemName: reminder.reminderType.systemImage)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(accentColor)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(reminder.title)
+                        .font(.subheadline.weight(.semibold))
+                    if let next = reminder.nextDueDate {
+                        Text(next.abbreviatedDateFR)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                CountdownBadge(daysRemaining: reminder.daysRemaining)
+            }
+        }
+        .buttonStyle(.plain)
+        .confirmationDialog("Marquer comme fait ?", isPresented: $showConfirm, titleVisibility: .visible) {
+            Button("Marquer comme fait", action: onMarkDone)
+            Button("Annuler", role: .cancel) {}
+        } message: {
+            Text("\(reminder.title) — prochain dans \(reminder.intervalDays) jours")
         }
     }
 }
