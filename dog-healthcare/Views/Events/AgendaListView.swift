@@ -52,7 +52,7 @@ struct AgendaListView: View {
                                     }
                             }
                         } header: {
-                            Text(group.date.longDateFR.capitalized)
+                            Text(group.date.longDateFR)
                                 .textCase(nil)
                                 .font(.subheadline.weight(.semibold))
                         }
