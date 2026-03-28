@@ -7,7 +7,6 @@ struct DogProfileView: View {
     @Environment(\.modelContext) private var context
 
     @State private var viewModel = DogViewModel()
-    @State private var showAddWeight = false
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var editMode = false
 
@@ -80,58 +79,6 @@ struct DogProfileView: View {
                     }
                 }
 
-                // Poids
-                Section {
-                    WeightChartView(entries: dog.weightEntries)
-                        .listRowInsets(EdgeInsets())
-                        .padding()
-
-                    if let latest = dog.latestWeight {
-                        LabeledContent("Dernier poids") {
-                            Text(String(format: "%.1f kg", latest))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
-                    Button {
-                        showAddWeight = true
-                    } label: {
-                        Label("Ajouter un poids", systemImage: "plus.circle.fill")
-                    }
-                } header: {
-                    Text("Poids")
-                }
-
-                // Historique poids
-                if !dog.weightEntries.isEmpty {
-                    Section("Historique") {
-                        ForEach(dog.weightEntries.sorted { $0.date > $1.date }) { entry in
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(String(format: "%.1f kg", entry.value))
-                                        .font(.headline)
-                                    Text(entry.date.abbreviatedDateFR)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if let note = entry.note {
-                                    Text(note)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    viewModel.deleteWeightEntry(entry, dog: dog, context: context)
-                                } label: {
-                                    Label("Supprimer", systemImage: "trash")
-                                }
-                            }
-                        }
-                    }
-                }
             }
             .navigationTitle("Profil")
             .toolbar {
@@ -154,9 +101,6 @@ struct DogProfileView: View {
                         editMode.toggle()
                     }
                 }
-            }
-            .sheet(isPresented: $showAddWeight) {
-                AddWeightView(dog: dog)
             }
         }
     }
