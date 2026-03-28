@@ -266,11 +266,11 @@ struct WeightChipCard: View {
         NavigationLink {
             WeightHistoryView(dog: dog)
         } label: {
-            GlassCard(tint: .green) {
+            GlassCard {
                 HStack {
                     Image(systemName: "scalemass.fill")
                         .font(.title2)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.secondary)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Dernier poids")
