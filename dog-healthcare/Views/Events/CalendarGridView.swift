@@ -124,6 +124,7 @@ struct CalendarGridView: View {
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
