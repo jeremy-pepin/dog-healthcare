@@ -134,6 +134,7 @@ struct CalendarGridView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        .background(.clear)
         .sheet(item: $vetEventToEdit) { event in
             AddVetEventView(dog: dog, viewModel: viewModel, existingEvent: event)
         }
