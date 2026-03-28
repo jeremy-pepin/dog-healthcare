@@ -6,41 +6,35 @@ struct EventsView: View {
     @State private var viewModel = EventsViewModel()
     @State private var showAddVet = false
     @State private var showAddCustom = false
-    @State private var displayMode: DisplayMode = .agenda
+    @State private var isCalendarExpanded = true
 
-    enum DisplayMode { case agenda, calendar }
+    private var isToday: Bool {
+        Calendar.current.isDateInToday(viewModel.selectedDate)
+    }
 
     var body: some View {
         NavigationStack {
-            TabView(selection: $displayMode) {
-                AgendaListView(dog: dog, viewModel: viewModel)
-                    .tag(DisplayMode.agenda)
-                CalendarGridView(dog: dog, viewModel: viewModel)
-                    .tag(DisplayMode.calendar)
+            VStack(spacing: 0) {
+                CalendarHeaderView(dog: dog, viewModel: viewModel, isExpanded: $isCalendarExpanded)
+                Divider()
+                AgendaScrollView(dog: dog, viewModel: viewModel)
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.easeInOut(duration: 0.3), value: displayMode)
-            .navigationTitle("Agenda")
+            .navigationTitle(viewModel.selectedMonth.monthYearString.capitalized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Picker("Vue", selection: $displayMode) {
-                        Text("Liste").tag(DisplayMode.agenda)
-                        Text("Calendrier").tag(DisplayMode.calendar)
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Aujourd'hui") {
+                        viewModel.selectedDate = .now
+                        viewModel.selectedMonth = .now
                     }
-                    .pickerStyle(.segmented)
-                    .frame(width: 200)
+                    .disabled(isToday)
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
-                        Button {
-                            showAddVet = true
-                        } label: {
+                        Button { showAddVet = true } label: {
                             Label("RDV vétérinaire", systemImage: "stethoscope")
                         }
-                        Button {
-                            showAddCustom = true
-                        } label: {
+                        Button { showAddCustom = true } label: {
                             Label("Autre événement", systemImage: "calendar.badge.plus")
                         }
                     } label: {

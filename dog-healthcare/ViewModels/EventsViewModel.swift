@@ -86,4 +86,18 @@ final class EventsViewModel {
     func nextMonth() {
         selectedMonth = Calendar.current.date(byAdding: .month, value: 1, to: selectedMonth) ?? selectedMonth
     }
+
+    func previousWeek() {
+        if let date = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: selectedDate) {
+            selectedDate = date
+            selectedMonth = date
+        }
+    }
+
+    func nextWeek() {
+        if let date = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: selectedDate) {
+            selectedDate = date
+            selectedMonth = date
+        }
+    }
 }
