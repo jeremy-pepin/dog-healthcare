@@ -1,155 +1,133 @@
 import SwiftUI
 
-// MARK: - Header collapsible (mois ↔ bande semaine)
-
-struct CalendarHeaderView: View {
+struct CalendarGridView: View {
     let dog: Dog
     @Bindable var viewModel: EventsViewModel
-    @Binding var isExpanded: Bool
 
-    private var cal: Calendar { .mondayFirst }
+    private var calendar: Calendar {
+        var cal = Calendar.current
+        cal.firstWeekday = 2 // Lundi
+        return cal
+    }
 
-    // Tous les jours du mois affiché avec les cases vides au début
     private var daysInMonth: [Date?] {
         let days = viewModel.selectedMonth.daysInMonth()
         guard let first = days.first else { return [] }
-        let weekday = cal.component(.weekday, from: first)
-        let offset = (weekday - cal.firstWeekday + 7) % 7
+        let weekday = calendar.component(.weekday, from: first)
+        let offset = (weekday - calendar.firstWeekday + 7) % 7
         var result: [Date?] = Array(repeating: nil, count: offset)
         result.append(contentsOf: days.map { Optional($0) })
         return result
     }
 
-    // Les 7 jours de la semaine contenant selectedDate
-    private var weekDays: [Date] {
-        let weekday = cal.component(.weekday, from: viewModel.selectedDate)
-        let offset = (weekday - cal.firstWeekday + 7) % 7
-        guard let monday = cal.date(byAdding: .day, value: -offset, to: viewModel.selectedDate) else { return [] }
-        return (0..<7).compactMap { cal.date(byAdding: .day, value: $0, to: monday) }
-    }
-
-    private var monthDatesWithEvents: Set<Date> {
+    private var datesWithEvents: Set<Date> {
         viewModel.datesWithEvents(in: viewModel.selectedMonth, for: dog)
     }
 
-    private var weekDatesWithEvents: Set<Date> {
-        let events = viewModel.allEvents(for: dog)
-        var result = Set<Date>()
-        for day in weekDays {
-            if events.contains(where: { $0.date.isInSameDay(as: day) }) {
-                result.insert(day)
-            }
-        }
-        return result
+    private var dayEvents: [any AppEvent] {
+        viewModel.events(on: viewModel.selectedDate, for: dog)
     }
 
-    private let weekdayLetters = ["L", "M", "M", "J", "V", "S", "D"]
+    private let weekdaySymbols = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Barre de navigation mois / titre cliquable
-            HStack(spacing: 0) {
-                Button {
-                    if isExpanded { viewModel.previousMonth() }
-                    else { viewModel.previousWeek() }
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .medium))
-                        .frame(width: 44, height: 44)
-                }
-
-                Spacer()
-
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        isExpanded.toggle()
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(viewModel.selectedMonth.monthYearString.capitalized)
+        ScrollView {
+            VStack(spacing: 0) {
+                // Navigation mois
+                HStack {
+                    Button {
+                        viewModel.previousMonth()
+                    } label: {
+                        Image(systemName: "chevron.left")
                             .font(.headline)
-                            .foregroundStyle(.primary)
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(.secondary)
+                            .padding(10)
+                            .background(.regularMaterial, in: Circle())
+                    }
+
+                    Spacer()
+
+                    Text(viewModel.selectedMonth.monthYearString.capitalized)
+                        .font(.headline)
+
+                    Spacer()
+
+                    Button {
+                        viewModel.nextMonth()
+                    } label: {
+                        Image(systemName: "chevron.right")
+                            .font(.headline)
+                            .padding(10)
+                            .background(.regularMaterial, in: Circle())
                     }
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 12)
 
-                Spacer()
-
-                Button {
-                    if isExpanded { viewModel.nextMonth() }
-                    else { viewModel.nextWeek() }
-                } label: {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 16, weight: .medium))
-                        .frame(width: 44, height: 44)
+                // En-têtes jours
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(weekdaySymbols, id: \.self) { symbol in
+                        Text(symbol)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
-            }
-            .padding(.horizontal, 4)
+                .padding(.horizontal)
 
-            // Initiales des jours de la semaine
-            LazyVGrid(columns: columns, spacing: 0) {
-                ForEach(Array(weekdayLetters.enumerated()), id: \.offset) { _, letter in
-                    Text(letter)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 4)
-
-            if isExpanded {
-                LazyVGrid(columns: columns, spacing: 2) {
+                // Grille
+                LazyVGrid(columns: columns, spacing: 8) {
                     ForEach(Array(daysInMonth.enumerated()), id: \.offset) { _, day in
                         if let day {
                             DayCell(
                                 date: day,
                                 isSelected: day.isInSameDay(as: viewModel.selectedDate),
                                 isToday: day.isInSameDay(as: .now),
-                                hasEvents: monthDatesWithEvents.contains(where: { $0.isInSameDay(as: day) })
+                                hasEvents: datesWithEvents.contains(where: { $0.isInSameDay(as: day) })
                             ) {
                                 viewModel.selectedDate = day
                             }
                         } else {
-                            Color.clear.frame(height: 44)
+                            Color.clear.frame(height: 48)
                         }
                     }
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 8)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .top).combined(with: .opacity),
-                    removal: .move(edge: .top).combined(with: .opacity)
-                ))
-            } else {
-                LazyVGrid(columns: columns, spacing: 2) {
-                    ForEach(weekDays, id: \.self) { day in
-                        DayCell(
-                            date: day,
-                            isSelected: day.isInSameDay(as: viewModel.selectedDate),
-                            isToday: day.isInSameDay(as: .now),
-                            hasEvents: weekDatesWithEvents.contains(where: { $0.isInSameDay(as: day) })
-                        ) {
-                            viewModel.selectedDate = day
-                            viewModel.selectedMonth = day
+
+                Divider()
+
+                // Événements du jour sélectionné
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(viewModel.selectedDate.longDateFR.capitalized)
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.horizontal)
+                        .padding(.top, 12)
+                        .padding(.bottom, 8)
+
+                    if dayEvents.isEmpty {
+                        Text("Aucun événement")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 20)
+                    } else {
+                        VStack(spacing: 0) {
+                            ForEach(dayEvents, id: \.notificationID) { event in
+                                EventRowView(event: event)
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                if event.notificationID != dayEvents.last?.notificationID {
+                                    Divider().padding(.leading, 68)
+                                }
+                            }
                         }
                     }
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 8)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .top).combined(with: .opacity),
-                    removal: .move(edge: .top).combined(with: .opacity)
-                ))
             }
         }
     }
 }
-
-// MARK: - Cellule jour
 
 struct DayCell: View {
     let date: Date
@@ -158,47 +136,35 @@ struct DayCell: View {
     let hasEvents: Bool
     let onTap: () -> Void
 
-    private var dayNumber: String {
+    private var day: String {
         "\(Calendar.current.component(.day, from: date))"
     }
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 3) {
+            VStack(spacing: 4) {
                 ZStack {
-                    Circle()
-                        .fill(circleColor)
-                        .frame(width: 32, height: 32)
+                    if isSelected {
+                        Circle()
+                            .fill(Color.accentColor)
+                            .frame(width: 34, height: 34)
+                    } else if isToday {
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.15))
+                            .frame(width: 34, height: 34)
+                    }
 
-                    Text(dayNumber)
-                        .font(.callout.weight(isToday || isSelected ? .semibold : .regular))
-                        .foregroundStyle(labelColor)
+                    Text(day)
+                        .font(.callout.weight(isToday || isSelected ? .bold : .regular))
+                        .foregroundStyle(isSelected ? Color.white : (isToday ? Color.accentColor : Color.primary))
                 }
 
-                // Point indicateur d'événements
                 Circle()
-                    .fill(dotColor)
+                    .fill(hasEvents ? Color.accentColor : Color.clear)
                     .frame(width: 4, height: 4)
             }
-            .frame(height: 44)
+            .frame(height: 48)
         }
         .buttonStyle(.plain)
-    }
-
-    private var circleColor: Color {
-        if isSelected { return .accentColor }
-        if isToday { return .red }
-        return .clear
-    }
-
-    private var labelColor: Color {
-        if isSelected || isToday { return .white }
-        return .primary
-    }
-
-    private var dotColor: Color {
-        guard hasEvents else { return .clear }
-        if isSelected { return .white.opacity(0.8) }
-        return .accentColor
     }
 }
