@@ -7,15 +7,7 @@ struct DashboardView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                LinearGradient(
-                    colors: [Color(.systemBackground), Color.accentColor.opacity(0.04)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-
-                ScrollView {
+            ScrollView {
                     LazyVStack(spacing: 16) {
                         // Hero
                         DogHeroCard(dog: dog)
@@ -41,6 +33,9 @@ struct DashboardView: View {
                             )
                         }
 
+                        // Rappels urgents (en retard ou ≤ 7 jours)
+                        UrgentRemindersCard(dog: dog)
+
                         // Événements à venir
                         UpcomingEventsCard(dog: dog)
 
@@ -52,7 +47,7 @@ struct DashboardView: View {
                     .padding()
                     .padding(.bottom, 20)
                 }
-            }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Accueil")
             .navigationBarTitleDisplayMode(.large)
         }
@@ -65,7 +60,7 @@ struct DogHeroCard: View {
     let dog: Dog
 
     var body: some View {
-        GlassCard {
+        GlassCard(solidBackground: Color(white: 0.13)) {
             HStack(spacing: 16) {
                 if let data = dog.photoData, let uiImage = UIImage(data: data) {
                     Image(uiImage: uiImage)
@@ -77,11 +72,11 @@ struct DogHeroCard: View {
                 } else {
                     ZStack {
                         Circle()
-                            .fill(Color.accentColor.opacity(0.15))
+                            .fill(.white.opacity(0.12))
                             .frame(width: 70, height: 70)
                         Image(systemName: "pawprint.fill")
                             .font(.title)
-                            .foregroundStyle(.tint)
+                            .foregroundStyle(.white)
                     }
                 }
 
@@ -101,6 +96,7 @@ struct DogHeroCard: View {
                 Spacer()
             }
         }
+        .environment(\.colorScheme, .dark)
     }
 }
 
@@ -111,7 +107,7 @@ struct NextEventCard: View {
 
     var body: some View {
         let next = dog.nextEvent
-        GlassCard(tint: .blue) {
+        GlassCard {
             VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(title: "Prochain rendez-vous")
 
@@ -119,11 +115,11 @@ struct NextEventCard: View {
                     HStack(spacing: 12) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color.blue.opacity(0.15))
+                                .fill(Color.blue)
                                 .frame(width: 44, height: 44)
                             Image(systemName: event.systemImage)
                                 .font(.title3)
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.white)
                         }
 
                         VStack(alignment: .leading, spacing: 3) {
@@ -137,7 +133,7 @@ struct NextEventCard: View {
                         Spacer()
 
                         VStack(alignment: .trailing, spacing: 3) {
-                            Text(event.date.abbreviatedDateFR)
+                            Text(event.date.fullDateFR)
                                 .font(.subheadline.weight(.semibold))
                             Text(event.date.timeString)
                                 .font(.caption)
@@ -173,12 +169,17 @@ struct MiniReminderCard: View {
         Button {
             if reminder != nil { showConfirm = true }
         } label: {
-            GlassCard(tint: Color.reminderColor(daysRemaining: days)) {
+            GlassCard {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Image(systemName: systemImage)
-                            .font(.title3)
-                            .foregroundStyle(Color.reminderColor(daysRemaining: days))
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.reminderColor(daysRemaining: days))
+                                .frame(width: 34, height: 34)
+                            Image(systemName: systemImage)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(.white)
+                        }
                         Spacer()
                         CountdownBadge(daysRemaining: days)
                     }
@@ -187,7 +188,7 @@ struct MiniReminderCard: View {
                         .font(.subheadline.weight(.semibold))
 
                     if let next = reminder?.nextDueDate {
-                        Text(next.abbreviatedDateFR)
+                        Text(next.fullDateFR)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
@@ -210,6 +211,88 @@ struct MiniReminderCard: View {
             if let r = reminder {
                 Text("\(title) — prochain dans \(r.intervalDays) jours")
             }
+        }
+    }
+}
+
+// MARK: - Rappels urgents
+
+struct UrgentRemindersCard: View {
+    let dog: Dog
+    @Environment(\.modelContext) private var context
+    @State private var viewModel = RemindersViewModel()
+
+    private var urgentReminders: [Reminder] {
+        viewModel.sortedReminders(for: dog).filter { reminder in
+            guard let days = reminder.daysRemaining else { return false }
+            let excluded: Set<ReminderType> = [.deworming, .antiParasite]
+            return days <= 7 && !excluded.contains(reminder.reminderType)
+        }
+    }
+
+    var body: some View {
+        if !urgentReminders.isEmpty {
+            GlassCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeader(title: "Rappels à venir")
+
+                    ForEach(urgentReminders, id: \.notificationID) { reminder in
+                        UrgentReminderRow(reminder: reminder, onMarkDone: {
+                            viewModel.markAsDone(reminder, context: context)
+                        })
+
+                        if reminder.notificationID != urgentReminders.last?.notificationID {
+                            Divider()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct UrgentReminderRow: View {
+    let reminder: Reminder
+    let onMarkDone: () -> Void
+    @State private var showConfirm = false
+
+    private var accentColor: Color {
+        .reminderColor(daysRemaining: reminder.daysRemaining)
+    }
+
+    var body: some View {
+        Button { showConfirm = true } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(accentColor)
+                        .frame(width: 38, height: 38)
+                    Image(systemName: reminder.reminderType.systemImage)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.white)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(reminder.title)
+                        .font(.subheadline.weight(.semibold))
+                    if let next = reminder.nextDueDate {
+                        Text(next.fullDateFR)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                CountdownBadge(daysRemaining: reminder.daysRemaining)
+            }
+        }
+        .buttonStyle(.plain)
+        .confirmationDialog("Marquer comme fait ?", isPresented: $showConfirm, titleVisibility: .visible) {
+            Button("Marquer comme fait", action: onMarkDone)
+            Button("Annuler", role: .cancel) {}
+        } message: {
+            Text("\(reminder.title) — prochain dans \(reminder.intervalDays) jours")
         }
     }
 }
@@ -240,7 +323,7 @@ struct UpcomingEventsCard: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(event.title)
                                     .font(.subheadline.weight(.medium))
-                                Text(event.date.abbreviatedDateTimeFR)
+                                Text(event.date.fullDateTimeFR)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -261,19 +344,20 @@ struct UpcomingEventsCard: View {
 
 struct WeightChipCard: View {
     let dog: Dog
+    @State private var showAddWeight = false
 
     var body: some View {
         NavigationLink {
             WeightHistoryView(dog: dog)
         } label: {
-            GlassCard(tint: .green) {
+            GlassCard {
                 HStack {
                     Image(systemName: "scalemass.fill")
                         .font(.title2)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.secondary)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Dernier poids")
+                        Text("Poids")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if let weight = dog.latestWeight {
@@ -290,5 +374,13 @@ struct WeightChipCard: View {
             }
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.5).onEnded { _ in
+                showAddWeight = true
+            }
+        )
+        .sheet(isPresented: $showAddWeight) {
+            AddWeightView(dog: dog)
+        }
     }
 }

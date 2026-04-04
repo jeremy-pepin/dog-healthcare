@@ -1,8 +1,13 @@
 import SwiftUI
+import SwiftData
 
 struct CalendarGridView: View {
     let dog: Dog
     @Bindable var viewModel: EventsViewModel
+    @Environment(\.modelContext) private var context
+
+    @State private var vetEventToEdit: VetEvent?
+    @State private var customEventToEdit: CustomEvent?
 
     private var calendar: Calendar {
         var cal = Calendar.current
@@ -47,7 +52,7 @@ struct CalendarGridView: View {
 
                     Spacer()
 
-                    Text(viewModel.selectedMonth.monthYearString.capitalized)
+                    Text(viewModel.selectedMonth.monthYearString)
                         .font(.headline)
 
                     Spacer()
@@ -99,7 +104,7 @@ struct CalendarGridView: View {
 
                 // Événements du jour sélectionné
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(viewModel.selectedDate.longDateFR.capitalized)
+                    Text(viewModel.selectedDate.longDateFR)
                         .font(.subheadline.weight(.semibold))
                         .padding(.horizontal)
                         .padding(.top, 12)
@@ -115,6 +120,8 @@ struct CalendarGridView: View {
                         VStack(spacing: 0) {
                             ForEach(dayEvents, id: \.notificationID) { event in
                                 EventRowView(event: event)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { openEdit(event) }
                                     .padding(.horizontal)
                                     .padding(.vertical, 8)
                                 if event.notificationID != dayEvents.last?.notificationID {
@@ -124,8 +131,21 @@ struct CalendarGridView: View {
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        .background(.clear)
+        .sheet(item: $vetEventToEdit) { event in
+            AddVetEventView(dog: dog, viewModel: viewModel, existingEvent: event)
+        }
+        .sheet(item: $customEventToEdit) { event in
+            AddCustomEventView(dog: dog, viewModel: viewModel, existingEvent: event)
+        }
+    }
+
+    private func openEdit(_ event: any AppEvent) {
+        if let vet = event as? VetEvent { vetEventToEdit = vet }
+        else if let custom = event as? CustomEvent { customEventToEdit = custom }
     }
 }
 

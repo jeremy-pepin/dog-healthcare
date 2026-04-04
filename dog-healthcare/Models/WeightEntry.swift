@@ -3,8 +3,8 @@ import Foundation
 
 @Model
 final class WeightEntry {
-    var date: Date
-    var value: Double
+    var date: Date = Date.now
+    var value: Double = 0
     var note: String?
     var dog: Dog?
 

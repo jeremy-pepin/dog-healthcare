@@ -7,7 +7,7 @@ final class EventsViewModel {
     var selectedMonth: Date = .now
 
     func allEvents(for dog: Dog) -> [any AppEvent] {
-        let events: [any AppEvent] = dog.vetEvents + dog.customEvents
+        let events: [any AppEvent] = (dog.vetEvents ?? []) + (dog.customEvents ?? [])
         return events.sorted { $0.date < $1.date }
     }
 
@@ -34,7 +34,7 @@ final class EventsViewModel {
     func addVetEvent(title: String, date: Date, veterinarian: Veterinarian?, notes: String?, dog: Dog, context: ModelContext) {
         let event = VetEvent(title: title, date: date, veterinarian: veterinarian, notes: notes)
         event.dog = dog
-        dog.vetEvents.append(event)
+        dog.vetEvents = (dog.vetEvents ?? []) + [event]
         context.insert(event)
         NotificationManager.shared.scheduleVetEventNotification(event)
     }
@@ -52,7 +52,7 @@ final class EventsViewModel {
     func addCustomEvent(title: String, date: Date, category: String, notes: String?, dog: Dog, context: ModelContext) {
         let event = CustomEvent(title: title, date: date, category: category, notes: notes)
         event.dog = dog
-        dog.customEvents.append(event)
+        dog.customEvents = (dog.customEvents ?? []) + [event]
         context.insert(event)
         NotificationManager.shared.scheduleCustomEventNotification(event)
     }
@@ -69,13 +69,13 @@ final class EventsViewModel {
 
     func deleteVetEvent(_ event: VetEvent, dog: Dog, context: ModelContext) {
         NotificationManager.shared.cancel(id: event.notificationID)
-        dog.vetEvents.removeAll { $0.id == event.id }
+        dog.vetEvents?.removeAll { $0.id == event.id }
         context.delete(event)
     }
 
     func deleteCustomEvent(_ event: CustomEvent, dog: Dog, context: ModelContext) {
         NotificationManager.shared.cancel(id: event.notificationID)
-        dog.customEvents.removeAll { $0.id == event.id }
+        dog.customEvents?.removeAll { $0.id == event.id }
         context.delete(event)
     }
 

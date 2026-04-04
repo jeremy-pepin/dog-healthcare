@@ -3,14 +3,14 @@ import Foundation
 
 @Model
 final class Veterinarian {
-    var name: String
+    var name: String = ""
     var clinic: String?
     var phone: String?
     var address: String?
     var notes: String?
 
     @Relationship(deleteRule: .nullify, inverse: \VetEvent.veterinarian)
-    var vetEvents: [VetEvent] = []
+    var vetEvents: [VetEvent]?
 
     init(name: String, clinic: String? = nil, phone: String? = nil,
          address: String? = nil, notes: String? = nil) {

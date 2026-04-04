@@ -6,26 +6,27 @@ struct WeightHistoryView: View {
     @Environment(\.modelContext) private var context
     @State private var viewModel = DogViewModel()
     @State private var showAddWeight = false
+    @State private var entryToEdit: WeightEntry?
 
     var body: some View {
         List {
             Section {
-                WeightChartView(entries: dog.weightEntries)
+                WeightChartView(entries: dog.weightEntries ?? [])
                     .listRowInsets(EdgeInsets())
                     .padding()
             }
 
             Section("Historique") {
-                if dog.weightEntries.isEmpty {
+                if (dog.weightEntries ?? []).isEmpty {
                     Text("Aucune mesure enregistrée")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(dog.weightEntries.sorted { $0.date > $1.date }) { entry in
+                    ForEach((dog.weightEntries ?? []).sorted { $0.date > $1.date }) { entry in
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(String(format: "%.1f kg", entry.value))
                                     .font(.headline)
-                                Text(entry.date.abbreviatedDateFR)
+                                Text(entry.date.fullDateFR)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -44,6 +45,14 @@ struct WeightHistoryView: View {
                                 Label("Supprimer", systemImage: "trash")
                             }
                         }
+                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                            Button {
+                                entryToEdit = entry
+                            } label: {
+                                Label("Modifier", systemImage: "pencil")
+                            }
+                            .tint(.blue)
+                        }
                     }
                 }
             }
@@ -61,6 +70,9 @@ struct WeightHistoryView: View {
         }
         .sheet(isPresented: $showAddWeight) {
             AddWeightView(dog: dog)
+        }
+        .sheet(item: $entryToEdit) { entry in
+            AddWeightView(dog: dog, existingEntry: entry)
         }
     }
 }

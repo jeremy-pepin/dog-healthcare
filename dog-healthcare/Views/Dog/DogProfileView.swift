@@ -5,24 +5,17 @@ import PhotosUI
 struct DogProfileView: View {
     @Bindable var dog: Dog
     @Environment(\.modelContext) private var context
+    @Environment(\.isCloudKitActive) private var isCloudKitActive
 
-    @State private var viewModel = DogViewModel()
-    @State private var showAddWeight = false
     @State private var selectedPhoto: PhotosPickerItem?
-    @State private var editMode = false
-
-    // Champs d'édition
-    @State private var editName = ""
-    @State private var editBreed = ""
-    @State private var editDOB = Date.now
+    @State private var showEditSheet = false
 
     private static let french = Locale(identifier: "fr_FR")
 
     var body: some View {
         NavigationStack {
-            List {
-                // Photo + identité
-                Section {
+            VStack(spacing: 0) {
+                GlassCard(solidBackground: Color(white: 0.13)) {
                     HStack(spacing: 16) {
                         PhotosPicker(selection: $selectedPhoto, matching: .images) {
                             dogPhoto
@@ -37,29 +30,24 @@ struct DogProfileView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
-                            if editMode {
-                                TextField("Nom", text: $editName)
-                                    .font(.title2.bold())
-                                TextField("Race", text: $editBreed)
+                            Text(dog.name)
+                                .font(.title2.bold())
+                            if !dog.breed.isEmpty {
+                                Text(dog.breed)
                                     .foregroundStyle(.secondary)
-                            } else {
-                                Text(dog.name)
-                                    .font(.title2.bold())
-                                if !dog.breed.isEmpty {
-                                    Text(dog.breed)
-                                        .foregroundStyle(.secondary)
-                                }
                             }
                         }
-                    }
-                    .padding(.vertical, 8)
-                }
 
-                // Informations
-                Section("Informations") {
-                    if editMode {
-                        DatePicker("Date de naissance", selection: $editDOB, in: ...Date.now, displayedComponents: .date)
-                    } else {
+                        Spacer()
+                    }
+                }
+                .environment(\.colorScheme, .dark)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
+
+                List {
+                    Section("Informations") {
                         LabeledContent("Date de naissance") {
                             Text(dog.dateOfBirth.formatted(.dateTime.day().month(.wide).year().locale(Self.french)))
                                 .foregroundStyle(.secondary)
@@ -69,94 +57,47 @@ struct DogProfileView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                }
 
-                // Vétérinaires
-                Section("Vétérinaires") {
-                    NavigationLink {
-                        VeterinarianListView()
-                    } label: {
-                        Label("Mes vétérinaires", systemImage: "stethoscope")
-                    }
-                }
-
-                // Poids
-                Section {
-                    WeightChartView(entries: dog.weightEntries)
-                        .listRowInsets(EdgeInsets())
-                        .padding()
-
-                    if let latest = dog.latestWeight {
-                        LabeledContent("Dernier poids") {
-                            Text(String(format: "%.1f kg", latest))
-                                .foregroundStyle(.secondary)
+                    Section("Poids") {
+                        NavigationLink {
+                            WeightHistoryView(dog: dog)
+                        } label: {
+                            Label("Poids", systemImage: "scalemass.fill")
                         }
                     }
 
-                    Button {
-                        showAddWeight = true
-                    } label: {
-                        Label("Ajouter un poids", systemImage: "plus.circle.fill")
+                    Section("Vétérinaires") {
+                        NavigationLink {
+                            VeterinarianListView()
+                        } label: {
+                            Label("Mes vétérinaires", systemImage: "stethoscope")
+                        }
                     }
-                } header: {
-                    Text("Poids")
-                }
 
-                // Historique poids
-                if !dog.weightEntries.isEmpty {
-                    Section("Historique") {
-                        ForEach(dog.weightEntries.sorted { $0.date > $1.date }) { entry in
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(String(format: "%.1f kg", entry.value))
-                                        .font(.headline)
-                                    Text(entry.date.abbreviatedDateFR)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if let note = entry.note {
-                                    Text(note)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    viewModel.deleteWeightEntry(entry, dog: dog, context: context)
-                                } label: {
-                                    Label("Supprimer", systemImage: "trash")
-                                }
+                    Section("Données") {
+                        LabeledContent("Synchronisation iCloud") {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(isCloudKitActive ? Color.green : Color.orange)
+                                    .frame(width: 8, height: 8)
+                                Text(isCloudKitActive ? "Active" : "Non disponible")
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
                 }
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Profil")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button(editMode ? "Enregistrer" : "Modifier") {
-                        if editMode {
-                            viewModel.updateDog(
-                                dog: dog,
-                                name: editName,
-                                breed: editBreed,
-                                dob: editDOB,
-                                photoData: dog.photoData,
-                                context: context
-                            )
-                        } else {
-                            editName = dog.name
-                            editBreed = dog.breed
-                            editDOB = dog.dateOfBirth
-                        }
-                        editMode.toggle()
+                    Button("Modifier") {
+                        showEditSheet = true
                     }
                 }
             }
-            .sheet(isPresented: $showAddWeight) {
-                AddWeightView(dog: dog)
+            .sheet(isPresented: $showEditSheet) {
+                EditDogView(dog: dog)
             }
         }
     }
@@ -172,8 +113,108 @@ struct DogProfileView: View {
                 .overlay(Circle().strokeBorder(.white.opacity(0.3), lineWidth: 1))
         } else {
             Circle()
-                .fill(.regularMaterial)
+                .fill(.white.opacity(0.12))
                 .frame(width: 72, height: 72)
+                .overlay {
+                    Image(systemName: "camera.fill")
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+        }
+    }
+}
+
+// MARK: - Feuille d'édition
+
+struct EditDogView: View {
+    @Bindable var dog: Dog
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name = ""
+    @State private var breed = ""
+    @State private var dateOfBirth = Date.now
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var photoData: Data?
+    @State private var viewModel = DogViewModel()
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        HStack(spacing: 14) {
+                            photoPreview
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Photo")
+                                    .font(.headline)
+                                Text("Appuyer pour modifier")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .onChange(of: selectedPhoto) {
+                        Task {
+                            if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
+                                photoData = data
+                            }
+                        }
+                    }
+                }
+
+                Section("Identité") {
+                    TextField("Nom", text: $name)
+                    TextField("Race (optionnel)", text: $breed)
+                }
+
+                Section("Date de naissance") {
+                    DatePicker("Date", selection: $dateOfBirth, in: ...Date.now, displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                }
+            }
+            .navigationTitle("Modifier le profil")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Annuler") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Enregistrer") {
+                        viewModel.updateDog(
+                            dog: dog,
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            breed: breed.trimmingCharacters(in: .whitespaces),
+                            dob: dateOfBirth,
+                            photoData: photoData ?? dog.photoData,
+                            context: context
+                        )
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+            .onAppear {
+                name = dog.name
+                breed = dog.breed
+                dateOfBirth = dog.dateOfBirth
+                photoData = dog.photoData
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var photoPreview: some View {
+        if let data = photoData, let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 56, height: 56)
+                .clipShape(Circle())
+        } else {
+            Circle()
+                .fill(Color(.tertiarySystemGroupedBackground))
+                .frame(width: 56, height: 56)
                 .overlay {
                     Image(systemName: "camera.fill")
                         .foregroundStyle(.secondary)

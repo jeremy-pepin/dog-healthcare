@@ -28,12 +28,12 @@ enum ReminderType: String, Codable, CaseIterable {
 
 @Model
 final class Reminder {
-    var title: String
-    var type: String
+    var title: String = ""
+    var type: String = ReminderType.custom.rawValue
     var lastDoneDate: Date?
-    var intervalDays: Int
-    var notificationID: String
-    var isActive: Bool
+    var intervalDays: Int = 30
+    var notificationID: String = UUID().uuidString
+    var isActive: Bool = true
     var dog: Dog?
 
     init(title: String, type: ReminderType, intervalDays: Int, lastDoneDate: Date? = nil) {

@@ -17,7 +17,7 @@ struct DocumentsView: View {
     @State private var documentToEdit: Document?
 
     private var groupedDocuments: [(category: String, docs: [Document])] {
-        let sorted = dog.documents.sorted { $0.date > $1.date }
+        let sorted = (dog.documents ?? []).sorted { $0.date > $1.date }
         var groups: [String: [Document]] = [:]
         for doc in sorted {
             groups[doc.category, default: []].append(doc)
@@ -30,7 +30,7 @@ struct DocumentsView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if dog.documents.isEmpty {
+                if (dog.documents ?? []).isEmpty {
                     ContentUnavailableView {
                         Label("Aucun document", systemImage: "doc.badge.plus")
                     } description: {
@@ -142,7 +142,7 @@ struct DocumentsView: View {
     }
 
     private func deleteDocument(_ doc: Document) {
-        dog.documents.removeAll { $0.id == doc.id }
+        dog.documents?.removeAll { $0.id == doc.id }
         context.delete(doc)
     }
 

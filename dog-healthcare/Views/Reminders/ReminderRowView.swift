@@ -21,7 +21,7 @@ struct ReminderRowView: View {
                     .font(.headline)
 
                 if let nextDue = reminder.nextDueDate {
-                    Text("Prochain : \(nextDue.formatted(date: .abbreviated, time: .omitted))")
+                    Text("Prochain : \(nextDue.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "fr_FR"))))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {

@@ -3,11 +3,11 @@ import Foundation
 
 @Model
 final class CustomEvent: AppEvent {
-    var title: String
-    var date: Date
-    var category: String
+    var title: String = ""
+    var date: Date = Date.now
+    var category: String = ""
     var notes: String?
-    var notificationID: String
+    var notificationID: String = UUID().uuidString
     var dog: Dog?
 
     init(title: String, date: Date, category: String, notes: String? = nil) {

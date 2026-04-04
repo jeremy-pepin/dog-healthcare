@@ -50,7 +50,7 @@ struct DogSetupView: View {
                     }
                     .padding(.top, 40)
 
-                    GlassCard {
+                    GlassCard(solidBackground: Color(white: 0.13)) {
                         VStack(spacing: 20) {
                             PhotosPicker(selection: $selectedPhoto, matching: .images) {
                                 ZStack {
@@ -82,19 +82,22 @@ struct DogSetupView: View {
                                 TextField("Nom du chien", text: $name)
                                     .textFieldStyle(.plain)
                                     .font(.headline)
+                                    .foregroundStyle(.white)
                                     .padding(12)
-                                    .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
+                                    .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
 
                                 TextField("Race (optionnel)", text: $breed)
                                     .textFieldStyle(.plain)
+                                    .foregroundStyle(.white)
                                     .padding(12)
-                                    .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
+                                    .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
 
                                 DatePicker("Date de naissance", selection: $dateOfBirth, in: ...Date.now, displayedComponents: .date)
                                     .datePickerStyle(.compact)
                             }
                         }
                     }
+                    .environment(\.colorScheme, .dark)
                     .padding(.horizontal)
 
                     Button {
@@ -133,7 +136,7 @@ struct DogSetupView: View {
         for (title, type, interval) in defaultReminders {
             let reminder = Reminder(title: title, type: type, intervalDays: interval)
             reminder.dog = dog
-            dog.reminders.append(reminder)
+            dog.reminders = (dog.reminders ?? []) + [reminder]
             context.insert(reminder)
         }
 

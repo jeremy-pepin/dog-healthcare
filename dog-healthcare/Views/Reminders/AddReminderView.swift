@@ -61,7 +61,7 @@ struct AddReminderView: View {
                                                 intervalDays == preset ? Color.accentColor : Color.secondary.opacity(0.15),
                                                 in: Capsule()
                                             )
-                                            .foregroundStyle(intervalDays == preset ? .white : .primary)
+                                            .foregroundStyle(intervalDays == preset ? Color(.systemBackground) : .primary)
                                     }
                                     .buttonStyle(.plain)
                                 }

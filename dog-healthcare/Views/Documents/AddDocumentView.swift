@@ -3,7 +3,7 @@ import SwiftData
 
 struct AddDocumentView: View {
     let dog: Dog
-    let pendingData: Data
+    let pendingData: Data?
     let pendingFileType: String
     var existingDocument: Document? = nil
 
@@ -49,7 +49,7 @@ struct AddDocumentView: View {
                                             category == cat ? Color.accentColor : Color.secondary.opacity(0.15),
                                             in: Capsule()
                                         )
-                                        .foregroundStyle(category == cat ? .white : .primary)
+                                        .foregroundStyle(category == cat ? Color(.systemBackground) : .primary)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -104,11 +104,11 @@ struct AddDocumentView: View {
                 category: category.isEmpty ? "Autre" : category,
                 date: date,
                 fileType: pendingFileType,
-                data: pendingData,
+                data: pendingData ?? Data(),
                 notes: notes.isEmpty ? nil : notes
             )
             doc.dog = dog
-            dog.documents.append(doc)
+            dog.documents = (dog.documents ?? []) + [doc]
             context.insert(doc)
             try? context.save()
         }
