@@ -3,15 +3,15 @@ import Foundation
 
 @Model
 final class Document {
-    var title: String
-    var category: String
-    var date: Date
-    var fileType: String          // "pdf" | "image"
-    @Attribute(.externalStorage) var data: Data
+    var title: String = ""
+    var category: String = ""
+    var date: Date = Date.now
+    var fileType: String = ""     // "pdf" | "image"
+    @Attribute(.externalStorage) var data: Data?
     var notes: String?
     var dog: Dog?
 
-    init(title: String, category: String, date: Date, fileType: String, data: Data, notes: String? = nil) {
+    init(title: String, category: String, date: Date, fileType: String, data: Data? = nil, notes: String? = nil) {
         self.title = title
         self.category = category
         self.date = date

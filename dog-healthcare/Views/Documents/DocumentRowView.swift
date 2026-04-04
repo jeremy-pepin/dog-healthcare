@@ -12,21 +12,19 @@ struct DocumentRowView: View {
                     .fill(thumbnailBackground)
                     .frame(width: 44, height: 56)
 
-                if document.isPDF {
-                    PDFThumbnailView(data: document.data)
+                if document.isPDF, let data = document.data {
+                    PDFThumbnailView(data: data)
+                        .frame(width: 40, height: 52)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                } else if let data = document.data, let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
                         .frame(width: 40, height: 52)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 } else {
-                    if let uiImage = UIImage(data: document.data) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 40, height: 52)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                    } else {
-                        Image(systemName: "photo")
-                            .foregroundStyle(.secondary)
-                    }
+                    Image(systemName: document.isPDF ? "doc" : "photo")
+                        .foregroundStyle(.secondary)
                 }
             }
 

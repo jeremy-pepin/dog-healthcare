@@ -12,9 +12,9 @@ struct DocumentDetailView: View {
 
     var body: some View {
         Group {
-            if document.isPDF {
-                PDFViewerView(data: document.data)
-            } else if let uiImage = UIImage(data: document.data) {
+            if document.isPDF, let data = document.data {
+                PDFViewerView(data: data)
+            } else if let data = document.data, let uiImage = UIImage(data: data) {
                 ScrollView([.horizontal, .vertical]) {
                     Image(uiImage: uiImage)
                         .resizable()
@@ -30,11 +30,13 @@ struct DocumentDetailView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
-                    ShareLink(
-                        item: document.data,
-                        preview: SharePreview(document.title, image: Image(systemName: document.isPDF ? "doc.fill" : "photo.fill"))
-                    ) {
-                        Label("Partager", systemImage: "square.and.arrow.up")
+                    if let data = document.data {
+                        ShareLink(
+                            item: data,
+                            preview: SharePreview(document.title, image: Image(systemName: document.isPDF ? "doc.fill" : "photo.fill"))
+                        ) {
+                            Label("Partager", systemImage: "square.and.arrow.up")
+                        }
                     }
 
                     Button {
@@ -66,7 +68,7 @@ struct DocumentDetailView: View {
         .confirmationDialog("Supprimer ce document ?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button("Supprimer", role: .destructive) {
                 if let dog = document.dog {
-                    dog.documents.removeAll { $0.id == document.id }
+                    dog.documents?.removeAll { $0.id == document.id }
                 }
                 context.delete(document)
                 dismiss()

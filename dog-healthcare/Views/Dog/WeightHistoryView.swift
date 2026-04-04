@@ -11,17 +11,17 @@ struct WeightHistoryView: View {
     var body: some View {
         List {
             Section {
-                WeightChartView(entries: dog.weightEntries)
+                WeightChartView(entries: dog.weightEntries ?? [])
                     .listRowInsets(EdgeInsets())
                     .padding()
             }
 
             Section("Historique") {
-                if dog.weightEntries.isEmpty {
+                if (dog.weightEntries ?? []).isEmpty {
                     Text("Aucune mesure enregistrée")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(dog.weightEntries.sorted { $0.date > $1.date }) { entry in
+                    ForEach((dog.weightEntries ?? []).sorted { $0.date > $1.date }) { entry in
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(String(format: "%.1f kg", entry.value))

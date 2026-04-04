@@ -136,7 +136,7 @@ struct DogSetupView: View {
         for (title, type, interval) in defaultReminders {
             let reminder = Reminder(title: title, type: type, intervalDays: interval)
             reminder.dog = dog
-            dog.reminders.append(reminder)
+            dog.reminders = (dog.reminders ?? []) + [reminder]
             context.insert(reminder)
         }
 

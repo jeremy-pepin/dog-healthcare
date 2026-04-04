@@ -3,25 +3,25 @@ import Foundation
 
 @Model
 final class Dog {
-    var name: String
-    var breed: String
-    var dateOfBirth: Date
+    var name: String = ""
+    var breed: String = ""
+    var dateOfBirth: Date = Date.now
     @Attribute(.externalStorage) var photoData: Data?
 
     @Relationship(deleteRule: .cascade, inverse: \WeightEntry.dog)
-    var weightEntries: [WeightEntry] = []
+    var weightEntries: [WeightEntry]?
 
     @Relationship(deleteRule: .cascade, inverse: \VetEvent.dog)
-    var vetEvents: [VetEvent] = []
+    var vetEvents: [VetEvent]?
 
     @Relationship(deleteRule: .cascade, inverse: \CustomEvent.dog)
-    var customEvents: [CustomEvent] = []
+    var customEvents: [CustomEvent]?
 
     @Relationship(deleteRule: .cascade, inverse: \Reminder.dog)
-    var reminders: [Reminder] = []
+    var reminders: [Reminder]?
 
     @Relationship(deleteRule: .cascade, inverse: \Document.dog)
-    var documents: [Document] = []
+    var documents: [Document]?
 
     init(name: String, breed: String, dateOfBirth: Date, photoData: Data? = nil) {
         self.name = name
@@ -35,12 +35,12 @@ final class Dog {
     }
 
     var latestWeight: Double? {
-        weightEntries.sorted { $0.date > $1.date }.first?.value
+        (weightEntries ?? []).sorted { $0.date > $1.date }.first?.value
     }
 
     var nextEvent: (any AppEvent)? {
         let now = Date.now
-        let allEvents: [any AppEvent] = vetEvents + customEvents
+        let allEvents: [any AppEvent] = (vetEvents ?? []) + (customEvents ?? [])
         return allEvents
             .filter { $0.date > now }
             .sorted { $0.date < $1.date }
@@ -49,7 +49,7 @@ final class Dog {
 
     var upcomingEvents: [any AppEvent] {
         let now = Date.now
-        let allEvents: [any AppEvent] = vetEvents + customEvents
+        let allEvents: [any AppEvent] = (vetEvents ?? []) + (customEvents ?? [])
         return allEvents
             .filter { $0.date > now }
             .sorted { $0.date < $1.date }

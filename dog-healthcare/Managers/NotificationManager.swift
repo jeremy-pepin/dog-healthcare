@@ -71,13 +71,13 @@ final class NotificationManager {
     }
 
     func refreshAllNotifications(for dog: Dog) {
-        for reminder in dog.reminders where reminder.isActive {
+        for reminder in dog.reminders ?? [] where reminder.isActive {
             scheduleReminderNotification(reminder)
         }
-        for event in dog.vetEvents where event.date > .now {
+        for event in dog.vetEvents ?? [] where event.date > .now {
             scheduleVetEventNotification(event)
         }
-        for event in dog.customEvents where event.date > .now {
+        for event in dog.customEvents ?? [] where event.date > .now {
             scheduleCustomEventNotification(event)
         }
     }

@@ -5,6 +5,7 @@ import PhotosUI
 struct DogProfileView: View {
     @Bindable var dog: Dog
     @Environment(\.modelContext) private var context
+    @Environment(\.isCloudKitActive) private var isCloudKitActive
 
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var showEditSheet = false
@@ -70,6 +71,18 @@ struct DogProfileView: View {
                             VeterinarianListView()
                         } label: {
                             Label("Mes vétérinaires", systemImage: "stethoscope")
+                        }
+                    }
+
+                    Section("Données") {
+                        LabeledContent("Synchronisation iCloud") {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(isCloudKitActive ? Color.green : Color.orange)
+                                    .frame(width: 8, height: 8)
+                                Text(isCloudKitActive ? "Active" : "Non disponible")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
