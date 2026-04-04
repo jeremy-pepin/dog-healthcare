@@ -38,7 +38,7 @@ struct DocumentRowView: View {
                         .foregroundStyle(.secondary)
                     Text("·")
                         .foregroundStyle(.tertiary)
-                    Text(document.date.fullDateFR)
+                    Text(document.date.relativeDateFR)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
