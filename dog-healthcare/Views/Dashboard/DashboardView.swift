@@ -107,7 +107,7 @@ struct NextEventCard: View {
 
     var body: some View {
         let next = dog.nextEvent
-        GlassCard(tint: .blue) {
+        GlassCard {
             VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(title: "Prochain rendez-vous")
 
@@ -115,11 +115,11 @@ struct NextEventCard: View {
                     HStack(spacing: 12) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color.blue.opacity(0.15))
+                                .fill(Color.blue)
                                 .frame(width: 44, height: 44)
                             Image(systemName: event.systemImage)
                                 .font(.title3)
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.white)
                         }
 
                         VStack(alignment: .leading, spacing: 3) {
@@ -169,12 +169,17 @@ struct MiniReminderCard: View {
         Button {
             if reminder != nil { showConfirm = true }
         } label: {
-            GlassCard(tint: Color.reminderColor(daysRemaining: days)) {
+            GlassCard {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Image(systemName: systemImage)
-                            .font(.title3)
-                            .foregroundStyle(Color.reminderColor(daysRemaining: days))
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.reminderColor(daysRemaining: days))
+                                .frame(width: 34, height: 34)
+                            Image(systemName: systemImage)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(.white)
+                        }
                         Spacer()
                         CountdownBadge(daysRemaining: days)
                     }
@@ -227,8 +232,7 @@ struct UrgentRemindersCard: View {
 
     var body: some View {
         if !urgentReminders.isEmpty {
-            let topColor = Color.reminderColor(daysRemaining: urgentReminders.first?.daysRemaining ?? 0)
-            GlassCard(tint: topColor) {
+            GlassCard {
                 VStack(alignment: .leading, spacing: 12) {
                     SectionHeader(title: "Rappels à venir")
 
@@ -261,11 +265,11 @@ struct UrgentReminderRow: View {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(accentColor.opacity(0.15))
+                        .fill(accentColor)
                         .frame(width: 38, height: 38)
                     Image(systemName: reminder.reminderType.systemImage)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(accentColor)
+                        .foregroundStyle(.white)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -340,6 +344,7 @@ struct UpcomingEventsCard: View {
 
 struct WeightChipCard: View {
     let dog: Dog
+    @State private var showAddWeight = false
 
     var body: some View {
         NavigationLink {
@@ -352,7 +357,7 @@ struct WeightChipCard: View {
                         .foregroundStyle(.secondary)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Dernier poids")
+                        Text("Poids")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if let weight = dog.latestWeight {
@@ -369,5 +374,13 @@ struct WeightChipCard: View {
             }
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.5).onEnded { _ in
+                showAddWeight = true
+            }
+        )
+        .sheet(isPresented: $showAddWeight) {
+            AddWeightView(dog: dog)
+        }
     }
 }

@@ -6,13 +6,14 @@ struct EventsView: View {
     @State private var viewModel = EventsViewModel()
     @State private var showAddVet = false
     @State private var showAddCustom = false
+    @State private var searchText = ""
 
     var body: some View {
         NavigationStack {
-            AgendaListView(dog: dog, viewModel: viewModel)
+            AgendaListView(dog: dog, viewModel: viewModel, searchText: $searchText)
                 .navigationTitle("Agenda")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbarBackground(.hidden, for: .navigationBar)
+                .navigationBarTitleDisplayMode(.large)
+                .searchable(text: $searchText, prompt: "Rechercher un événement")
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         Menu {

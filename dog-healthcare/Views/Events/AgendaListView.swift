@@ -18,12 +18,13 @@ enum EventFilter: String, CaseIterable {
 struct AgendaListView: View {
     let dog: Dog
     @Bindable var viewModel: EventsViewModel
+    @Binding var searchText: String
     @Environment(\.modelContext) private var context
 
-    @State private var searchText = ""
     @State private var filter: EventFilter = .upcoming
     @State private var vetEventToEdit: VetEvent?
     @State private var customEventToEdit: CustomEvent?
+    @Environment(\.isSearching) private var isSearching
 
     private var filteredEvents: [any AppEvent] {
         let today = Calendar.current.startOfDay(for: .now)
@@ -54,22 +55,23 @@ struct AgendaListView: View {
 
     var body: some View {
         List {
-            // Badges filtre — toujours visibles
-            Section {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(EventFilter.allCases, id: \.self) { f in
-                            FilterBadge(label: f.rawValue, icon: f.systemImage, isSelected: filter == f) {
-                                withAnimation(.spring(duration: 0.25)) { filter = f }
+            if !isSearching {
+                Section {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(EventFilter.allCases, id: \.self) { f in
+                                FilterBadge(label: f.rawValue, icon: f.systemImage, isSelected: filter == f) {
+                                    withAnimation(.spring(duration: 0.25)) { filter = f }
+                                }
                             }
                         }
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
                 }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
             }
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-            .listRowSeparator(.hidden)
 
             if groupedEvents.isEmpty {
                 ContentUnavailableView {
@@ -84,22 +86,24 @@ struct AgendaListView: View {
                 ForEach(groupedEvents, id: \.date) { group in
                     Section {
                         ForEach(group.events, id: \.notificationID) { event in
-                            EventRowView(event: event)
-                                .contentShape(Rectangle())
-                                .onTapGesture { openEdit(event) }
-                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                    Button(role: .destructive) {
-                                        deleteEvent(event)
-                                    } label: {
-                                        Label("Supprimer", systemImage: "trash")
-                                    }
+                            Button { openEdit(event) } label: {
+                                EventRowView(event: event)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteEvent(event)
+                                } label: {
+                                    Label("Supprimer", systemImage: "trash")
                                 }
-                                .swipeActions(edge: .leading) {
-                                    Button { openEdit(event) } label: {
-                                        Label("Modifier", systemImage: "pencil")
-                                    }
-                                    .tint(.blue)
+                            }
+                            .swipeActions(edge: .leading) {
+                                Button { openEdit(event) } label: {
+                                    Label("Modifier", systemImage: "pencil")
                                 }
+                                .tint(.blue)
+                            }
                         }
                     } header: {
                         Text(group.date.longDateFR)
@@ -110,7 +114,7 @@ struct AgendaListView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .searchable(text: $searchText, prompt: "Rechercher un événement")
+        .animation(.easeInOut(duration: 0.2), value: isSearching)
         .sheet(item: $vetEventToEdit) { (event: VetEvent) in
             AddVetEventView(dog: dog, viewModel: viewModel, existingEvent: event)
         }
