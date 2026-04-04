@@ -72,6 +72,35 @@ extension Date {
     var longDateFR: String {
         formatted(.dateTime.weekday(.wide).day().month(.wide).locale(Self.french))
     }
+
+    private var relativeLabel: String? {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let selfDay = cal.startOfDay(for: self)
+        let diff = cal.dateComponents([.day], from: today, to: selfDay).day ?? 0
+        switch diff {
+        case -1: return "hier"
+        case 0: return "aujourd'hui"
+        case 1: return "demain"
+        case 2: return "après-demain"
+        default: return nil
+        }
+    }
+
+    var relativeDateFR: String {
+        relativeLabel ?? fullDateFR
+    }
+
+    var relativeDateTimeFR: String {
+        if let label = relativeLabel {
+            return "\(label) à \(timeString)"
+        }
+        return fullDateTimeFR
+    }
+
+    var relativeLongDateFR: String {
+        relativeLabel ?? longDateFR
+    }
 }
 
 extension Calendar {

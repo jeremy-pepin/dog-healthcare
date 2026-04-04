@@ -39,8 +39,10 @@ struct AddCustomEventView: View {
                         HStack(spacing: 8) {
                             ForEach(suggestedCategories, id: \.self) { cat in
                                 Button {
-                                    category = cat
-                                    if title.isEmpty { title = cat }
+                                    withAnimation(.spring(duration: 0.2)) {
+                                        category = cat
+                                        if title.isEmpty { title = cat }
+                                    }
                                 } label: {
                                     Text(cat)
                                         .font(.caption.weight(.medium))
@@ -51,6 +53,7 @@ struct AddCustomEventView: View {
                                             in: Capsule()
                                         )
                                         .foregroundStyle(category == cat ? Color(.systemBackground) : .primary)
+                                        .animation(.spring(duration: 0.2), value: category)
                                 }
                                 .buttonStyle(.plain)
                             }

@@ -88,6 +88,7 @@ struct AgendaListView: View {
                         ForEach(group.events, id: \.notificationID) { event in
                             Button { openEdit(event) } label: {
                                 EventRowView(event: event)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                     .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
@@ -106,7 +107,7 @@ struct AgendaListView: View {
                             }
                         }
                     } header: {
-                        Text(group.date.longDateFR)
+                        Text(group.date.relativeLongDateFR)
                             .textCase(nil)
                             .font(.subheadline.weight(.semibold))
                     }
@@ -115,6 +116,7 @@ struct AgendaListView: View {
         }
         .listStyle(.insetGrouped)
         .animation(.easeInOut(duration: 0.2), value: isSearching)
+        .animation(.spring(duration: 0.3), value: filter)
         .sheet(item: $vetEventToEdit) { (event: VetEvent) in
             AddVetEventView(dog: dog, viewModel: viewModel, existingEvent: event)
         }
@@ -129,10 +131,12 @@ struct AgendaListView: View {
     }
 
     private func deleteEvent(_ event: any AppEvent) {
-        if let vet = event as? VetEvent {
-            viewModel.deleteVetEvent(vet, dog: dog, context: context)
-        } else if let custom = event as? CustomEvent {
-            viewModel.deleteCustomEvent(custom, dog: dog, context: context)
+        withAnimation(.spring(duration: 0.3)) {
+            if let vet = event as? VetEvent {
+                viewModel.deleteVetEvent(vet, dog: dog, context: context)
+            } else if let custom = event as? CustomEvent {
+                viewModel.deleteCustomEvent(custom, dog: dog, context: context)
+            }
         }
     }
 }

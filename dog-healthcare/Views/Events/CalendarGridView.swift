@@ -104,7 +104,7 @@ struct CalendarGridView: View {
 
                 // Événements du jour sélectionné
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(viewModel.selectedDate.longDateFR)
+                    Text(viewModel.selectedDate.relativeLongDateFR)
                         .font(.subheadline.weight(.semibold))
                         .padding(.horizontal)
                         .padding(.top, 12)

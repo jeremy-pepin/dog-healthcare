@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CountdownBadge: View {
     let daysRemaining: Int?
+    @State private var pulsing = false
 
     private var label: String {
         guard let days = daysRemaining else { return "Non défini" }
@@ -12,6 +13,11 @@ struct CountdownBadge: View {
 
     private var badgeColor: Color {
         .reminderColor(daysRemaining: daysRemaining)
+    }
+
+    private var isUrgent: Bool {
+        guard let days = daysRemaining else { return false }
+        return days <= 7
     }
 
     var body: some View {
@@ -27,6 +33,13 @@ struct CountdownBadge: View {
                         Capsule()
                             .strokeBorder(badgeColor.opacity(0.3), lineWidth: 0.5)
                     }
+            }
+            .scaleEffect(pulsing ? 1.07 : 1.0)
+            .onAppear {
+                guard isUrgent else { return }
+                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                    pulsing = true
+                }
             }
     }
 }

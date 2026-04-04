@@ -133,7 +133,7 @@ struct NextEventCard: View {
                         Spacer()
 
                         VStack(alignment: .trailing, spacing: 3) {
-                            Text(event.date.fullDateFR)
+                            Text(event.date.relativeDateFR)
                                 .font(.subheadline.weight(.semibold))
                             Text(event.date.timeString)
                                 .font(.caption)
@@ -162,6 +162,7 @@ struct MiniReminderCard: View {
     let reminder: Reminder?
     @Environment(\.modelContext) private var context
     @State private var showConfirm = false
+    @State private var justDone = false
     @State private var viewModel = RemindersViewModel()
 
     var body: some View {
@@ -197,13 +198,32 @@ struct MiniReminderCard: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                .blur(radius: justDone ? 4 : 0)
+                .animation(.easeInOut(duration: 0.25), value: justDone)
+            }
+            .overlay {
+                if justDone {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.green.opacity(0.18))
+                        .overlay {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.largeTitle)
+                                .foregroundStyle(.green)
+                        }
+                        .transition(.opacity.combined(with: .scale(scale: 0.85)))
+                }
             }
         }
         .buttonStyle(.plain)
         .confirmationDialog("Marquer comme fait ?", isPresented: $showConfirm, titleVisibility: .visible) {
             Button("Marquer comme fait") {
                 if let r = reminder {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    withAnimation(.spring(duration: 0.3)) { justDone = true }
                     viewModel.markAsDone(r, context: context)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        withAnimation(.easeOut(duration: 0.3)) { justDone = false }
+                    }
                 }
             }
             Button("Annuler", role: .cancel) {}
@@ -238,7 +258,10 @@ struct UrgentRemindersCard: View {
 
                     ForEach(urgentReminders, id: \.notificationID) { reminder in
                         UrgentReminderRow(reminder: reminder, onMarkDone: {
-                            viewModel.markAsDone(reminder, context: context)
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            withAnimation(.spring(duration: 0.4)) {
+                                viewModel.markAsDone(reminder, context: context)
+                            }
                         })
 
                         if reminder.notificationID != urgentReminders.last?.notificationID {
@@ -323,7 +346,7 @@ struct UpcomingEventsCard: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(event.title)
                                     .font(.subheadline.weight(.medium))
-                                Text(event.date.fullDateTimeFR)
+                                Text(event.date.relativeDateTimeFR)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }

@@ -50,8 +50,10 @@ struct AddReminderView: View {
                             HStack(spacing: 8) {
                                 ForEach(presets, id: \.self) { preset in
                                     Button {
-                                        intervalDays = preset
-                                        customInterval = "\(preset)"
+                                        withAnimation(.spring(duration: 0.2)) {
+                                            intervalDays = preset
+                                            customInterval = "\(preset)"
+                                        }
                                     } label: {
                                         Text(presetLabel(preset))
                                             .font(.caption.weight(.medium))
@@ -62,6 +64,7 @@ struct AddReminderView: View {
                                                 in: Capsule()
                                             )
                                             .foregroundStyle(intervalDays == preset ? Color(.systemBackground) : .primary)
+                                            .animation(.spring(duration: 0.2), value: intervalDays)
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -87,9 +90,10 @@ struct AddReminderView: View {
                 }
 
                 Section("Dernier traitement") {
-                    Toggle("Déjà effectué", isOn: $hasLastDone)
+                    Toggle("Déjà effectué", isOn: $hasLastDone.animation(.spring(duration: 0.3)))
                     if hasLastDone {
                         DatePicker("Date", selection: $lastDoneDate, in: ...Date.now, displayedComponents: .date)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                 }
             }

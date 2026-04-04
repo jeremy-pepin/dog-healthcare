@@ -5,6 +5,7 @@ struct RootTabView: View {
     @Query private var dogs: [Dog]
 
     var body: some View {
+        Group {
         if let dog = dogs.first {
             VStack(spacing: 0) {
                 #if DEVELOPMENT
@@ -31,8 +32,12 @@ struct RootTabView: View {
                     NotificationManager.shared.refreshAllNotifications(for: dog)
                 }
             }
+            .transition(.opacity)
         } else {
             DogSetupView()
+                .transition(.opacity)
         }
+        }
+        .animation(.easeIn(duration: 0.4), value: dogs.first?.id)
     }
 }
