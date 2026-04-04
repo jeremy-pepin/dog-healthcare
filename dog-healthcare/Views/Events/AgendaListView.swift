@@ -150,7 +150,7 @@ struct FilterBadge: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 7)
                 .background(isSelected ? Color.accentColor : Color.accentColor.opacity(0.1), in: Capsule())
-                .foregroundStyle(isSelected ? .white : .accentColor)
+                .foregroundStyle(isSelected ? Color(.systemBackground) : .accentColor)
         }
         .buttonStyle(.plain)
     }

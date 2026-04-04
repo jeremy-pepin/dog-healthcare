@@ -104,6 +104,7 @@
 			knownRegions = (
 				en,
 				Base,
+				fr,
 			);
 			mainGroup = E61126BB2F7800E600A6EF25;
 			minimizedProjectReferenceProxies = 1;
@@ -415,7 +416,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "dog-healthcare/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Dog Healthcare";
+				INFOPLIST_KEY_CFBundleDisplayName = "Dog HC DEV";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Utilisé pour scanner des documents vétérinaires comme des factures ou ordonnances.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Utilisé pour importer des photos et documents depuis votre photothèque.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

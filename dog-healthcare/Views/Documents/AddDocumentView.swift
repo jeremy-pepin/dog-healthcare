@@ -49,7 +49,7 @@ struct AddDocumentView: View {
                                             category == cat ? Color.accentColor : Color.secondary.opacity(0.15),
                                             in: Capsule()
                                         )
-                                        .foregroundStyle(category == cat ? .white : .primary)
+                                        .foregroundStyle(category == cat ? Color(.systemBackground) : .primary)
                                 }
                                 .buttonStyle(.plain)
                             }

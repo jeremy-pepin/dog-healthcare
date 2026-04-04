@@ -24,7 +24,12 @@ struct AddCustomEventView: View {
             Form {
                 Section("Événement") {
                     TextField("Titre", text: $title)
-                    DatePicker("Date et heure", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                    HStack {
+                        Text("Date et heure")
+                        Spacer(minLength: 8)
+                        DatePickerWithInterval(selection: $date, minuteInterval: 5)
+                            .frame(height: 34)
+                    }
                 }
 
                 Section("Catégorie") {
@@ -45,7 +50,7 @@ struct AddCustomEventView: View {
                                             category == cat ? Color.accentColor : Color.secondary.opacity(0.15),
                                             in: Capsule()
                                         )
-                                        .foregroundStyle(category == cat ? .white : .primary)
+                                        .foregroundStyle(category == cat ? Color(.systemBackground) : .primary)
                                 }
                                 .buttonStyle(.plain)
                             }

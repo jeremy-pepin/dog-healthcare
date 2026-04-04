@@ -23,7 +23,12 @@ struct AddVetEventView: View {
             Form {
                 Section("Événement") {
                     TextField("Titre", text: $title)
-                    DatePicker("Date et heure", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                    HStack {
+                        Text("Date et heure")
+                        Spacer(minLength: 8)
+                        DatePickerWithInterval(selection: $date, minuteInterval: 5)
+                            .frame(height: 34)
+                    }
                 }
 
                 Section("Vétérinaire (optionnel)") {
