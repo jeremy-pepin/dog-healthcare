@@ -7,15 +7,7 @@ struct DashboardView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                LinearGradient(
-                    colors: [Color(.systemBackground), Color.accentColor.opacity(0.04)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-
-                ScrollView {
+            ScrollView {
                     LazyVStack(spacing: 16) {
                         // Hero
                         DogHeroCard(dog: dog)
@@ -55,7 +47,7 @@ struct DashboardView: View {
                     .padding()
                     .padding(.bottom, 20)
                 }
-            }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Accueil")
             .navigationBarTitleDisplayMode(.large)
         }
@@ -68,7 +60,7 @@ struct DogHeroCard: View {
     let dog: Dog
 
     var body: some View {
-        GlassCard {
+        GlassCard(solidBackground: Color(white: 0.13)) {
             HStack(spacing: 16) {
                 if let data = dog.photoData, let uiImage = UIImage(data: data) {
                     Image(uiImage: uiImage)
@@ -80,11 +72,11 @@ struct DogHeroCard: View {
                 } else {
                     ZStack {
                         Circle()
-                            .fill(Color.accentColor.opacity(0.15))
+                            .fill(.white.opacity(0.12))
                             .frame(width: 70, height: 70)
                         Image(systemName: "pawprint.fill")
                             .font(.title)
-                            .foregroundStyle(.tint)
+                            .foregroundStyle(.white)
                     }
                 }
 
@@ -104,6 +96,7 @@ struct DogHeroCard: View {
                 Spacer()
             }
         }
+        .environment(\.colorScheme, .dark)
     }
 }
 
@@ -140,7 +133,7 @@ struct NextEventCard: View {
                         Spacer()
 
                         VStack(alignment: .trailing, spacing: 3) {
-                            Text(event.date.abbreviatedDateFR)
+                            Text(event.date.fullDateFR)
                                 .font(.subheadline.weight(.semibold))
                             Text(event.date.timeString)
                                 .font(.caption)
@@ -190,7 +183,7 @@ struct MiniReminderCard: View {
                         .font(.subheadline.weight(.semibold))
 
                     if let next = reminder?.nextDueDate {
-                        Text(next.abbreviatedDateFR)
+                        Text(next.fullDateFR)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
@@ -279,7 +272,7 @@ struct UrgentReminderRow: View {
                     Text(reminder.title)
                         .font(.subheadline.weight(.semibold))
                     if let next = reminder.nextDueDate {
-                        Text(next.abbreviatedDateFR)
+                        Text(next.fullDateFR)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -326,7 +319,7 @@ struct UpcomingEventsCard: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(event.title)
                                     .font(.subheadline.weight(.medium))
-                                Text(event.date.abbreviatedDateTimeFR)
+                                Text(event.date.fullDateTimeFR)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }

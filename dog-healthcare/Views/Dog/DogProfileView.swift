@@ -19,9 +19,8 @@ struct DogProfileView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                // Photo + identité
-                Section {
+            VStack(spacing: 0) {
+                GlassCard(solidBackground: Color(white: 0.13)) {
                     HStack(spacing: 16) {
                         PhotosPicker(selection: $selectedPhoto, matching: .images) {
                             dogPhoto
@@ -50,36 +49,52 @@ struct DogProfileView: View {
                                 }
                             }
                         }
-                    }
-                    .padding(.vertical, 8)
-                }
 
-                // Informations
-                Section("Informations") {
-                    if editMode {
-                        DatePicker("Date de naissance", selection: $editDOB, in: ...Date.now, displayedComponents: .date)
-                    } else {
-                        LabeledContent("Date de naissance") {
-                            Text(dog.dateOfBirth.formatted(.dateTime.day().month(.wide).year().locale(Self.french)))
-                                .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                }
+                .environment(\.colorScheme, .dark)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
+
+                List {
+                    // Informations
+                    Section("Informations") {
+                        if editMode {
+                            DatePicker("Date de naissance", selection: $editDOB, in: ...Date.now, displayedComponents: .date)
+                        } else {
+                            LabeledContent("Date de naissance") {
+                                Text(dog.dateOfBirth.formatted(.dateTime.day().month(.wide).year().locale(Self.french)))
+                                    .foregroundStyle(.secondary)
+                            }
+                            LabeledContent("Âge") {
+                                Text(dog.age)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
-                        LabeledContent("Âge") {
-                            Text(dog.age)
-                                .foregroundStyle(.secondary)
+                    }
+
+                    // Poids
+                    Section("Poids") {
+                        NavigationLink {
+                            WeightHistoryView(dog: dog)
+                        } label: {
+                            Label("Poids", systemImage: "scalemass.fill")
+                        }
+                    }
+
+                    // Vétérinaires
+                    Section("Vétérinaires") {
+                        NavigationLink {
+                            VeterinarianListView()
+                        } label: {
+                            Label("Mes vétérinaires", systemImage: "stethoscope")
                         }
                     }
                 }
-
-                // Vétérinaires
-                Section("Vétérinaires") {
-                    NavigationLink {
-                        VeterinarianListView()
-                    } label: {
-                        Label("Mes vétérinaires", systemImage: "stethoscope")
-                    }
-                }
-
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Profil")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -116,11 +131,11 @@ struct DogProfileView: View {
                 .overlay(Circle().strokeBorder(.white.opacity(0.3), lineWidth: 1))
         } else {
             Circle()
-                .fill(.regularMaterial)
+                .fill(.white.opacity(0.12))
                 .frame(width: 72, height: 72)
                 .overlay {
                     Image(systemName: "camera.fill")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.6))
                 }
         }
     }
