@@ -23,7 +23,9 @@ struct DogProfileView: View {
                         .onChange(of: selectedPhoto) {
                             Task {
                                 if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
-                                    dog.photoData = data
+                                    withAnimation(.spring(duration: 0.4)) {
+                                        dog.photoData = data
+                                    }
                                     try? context.save()
                                 }
                             }
@@ -111,6 +113,7 @@ struct DogProfileView: View {
                 .frame(width: 72, height: 72)
                 .clipShape(Circle())
                 .overlay(Circle().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
         } else {
             Circle()
                 .fill(.white.opacity(0.12))
@@ -119,6 +122,7 @@ struct DogProfileView: View {
                     Image(systemName: "camera.fill")
                         .foregroundStyle(.white.opacity(0.6))
                 }
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
         }
     }
 }

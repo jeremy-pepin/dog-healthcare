@@ -30,13 +30,18 @@ struct RemindersView: View {
                             Section {
                                 ForEach(overdue) { reminder in
                                     ReminderRowView(reminder: reminder) {
-                                        viewModel.markAsDone(reminder, context: context)
+                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                        withAnimation(.spring(duration: 0.3)) {
+                                            viewModel.markAsDone(reminder, context: context)
+                                        }
                                     }
                                     .contentShape(Rectangle())
                                     .onTapGesture { reminderToEdit = reminder }
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                         Button(role: .destructive) {
-                                            viewModel.deleteReminder(reminder, dog: dog, context: context)
+                                            withAnimation(.spring(duration: 0.3)) {
+                                                viewModel.deleteReminder(reminder, dog: dog, context: context)
+                                            }
                                         } label: {
                                             Label("Supprimer", systemImage: "trash")
                                         }
@@ -60,13 +65,18 @@ struct RemindersView: View {
                             Section("À venir") {
                                 ForEach(upcoming) { reminder in
                                     ReminderRowView(reminder: reminder) {
-                                        viewModel.markAsDone(reminder, context: context)
+                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                        withAnimation(.spring(duration: 0.3)) {
+                                            viewModel.markAsDone(reminder, context: context)
+                                        }
                                     }
                                     .contentShape(Rectangle())
                                     .onTapGesture { reminderToEdit = reminder }
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                         Button(role: .destructive) {
-                                            viewModel.deleteReminder(reminder, dog: dog, context: context)
+                                            withAnimation(.spring(duration: 0.3)) {
+                                                viewModel.deleteReminder(reminder, dog: dog, context: context)
+                                            }
                                         } label: {
                                             Label("Supprimer", systemImage: "trash")
                                         }

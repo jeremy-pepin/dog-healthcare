@@ -11,6 +11,7 @@ struct DogSetupView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoData: Data?
     @State private var isCreating = false
+    @State private var appeared = false
 
     private var canCreate: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty
@@ -39,19 +40,29 @@ struct DogSetupView: View {
                                         Circle().strokeBorder(.white.opacity(0.3), lineWidth: 1)
                                     }
                             }
+                            .scaleEffect(appeared ? 1 : 0.6)
+                            .opacity(appeared ? 1 : 0)
+                            .animation(.spring(duration: 0.6), value: appeared)
 
                         Text("Bienvenue !")
                             .font(.largeTitle.bold())
+                            .opacity(appeared ? 1 : 0)
+                            .offset(y: appeared ? 0 : 12)
+                            .animation(.spring(duration: 0.5).delay(0.1), value: appeared)
 
                         Text("Commençons par créer le profil de votre chien.")
                             .font(.body)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
+                            .opacity(appeared ? 1 : 0)
+                            .offset(y: appeared ? 0 : 12)
+                            .animation(.spring(duration: 0.5).delay(0.15), value: appeared)
                     }
                     .padding(.top, 40)
 
                     GlassCard(solidBackground: Color(white: 0.13)) {
                         VStack(spacing: 20) {
+
                             PhotosPicker(selection: $selectedPhoto, matching: .images) {
                                 ZStack {
                                     if let data = photoData, let uiImage = UIImage(data: data) {
@@ -99,6 +110,9 @@ struct DogSetupView: View {
                     }
                     .environment(\.colorScheme, .dark)
                     .padding(.horizontal)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 20)
+                    .animation(.spring(duration: 0.5).delay(0.2), value: appeared)
 
                     Button {
                         createDog()
@@ -111,9 +125,13 @@ struct DogSetupView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(!canCreate || isCreating)
                     .padding(.horizontal)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 20)
+                    .animation(.spring(duration: 0.5).delay(0.3), value: appeared)
                 }
                 .padding(.bottom, 40)
             }
+            .onAppear { appeared = true }
         }
     }
 
