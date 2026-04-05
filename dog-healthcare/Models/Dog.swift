@@ -23,6 +23,9 @@ final class Dog {
     @Relationship(deleteRule: .cascade, inverse: \Document.dog)
     var documents: [Document]?
 
+    @Relationship(deleteRule: .cascade, inverse: \DocumentFolder.dog)
+    var documentFolders: [DocumentFolder]?
+
     init(name: String, breed: String, dateOfBirth: Date, photoData: Data? = nil) {
         self.name = name
         self.breed = breed

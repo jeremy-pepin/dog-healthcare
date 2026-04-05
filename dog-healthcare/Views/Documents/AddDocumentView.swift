@@ -6,6 +6,7 @@ struct AddDocumentView: View {
     let pendingData: Data?
     let pendingFileType: String
     var existingDocument: Document? = nil
+    var preselectedFolder: DocumentFolder? = nil
 
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
@@ -14,6 +15,7 @@ struct AddDocumentView: View {
     @State private var category = ""
     @State private var date = Date.now
     @State private var notes = ""
+    @State private var selectedFolder: DocumentFolder? = nil
 
     private var isEditing: Bool { existingDocument != nil }
     private var canSave: Bool { !title.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -22,6 +24,12 @@ struct AddDocumentView: View {
         "Facture", "Ordonnance", "Carnet vaccin",
         "Radio / Écho", "Analyse", "Compte-rendu", "Autre"
     ]
+
+    private var sortedFolders: [DocumentFolder] {
+        (dog.documentFolders ?? []).sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -62,6 +70,18 @@ struct AddDocumentView: View {
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 }
 
+                if !sortedFolders.isEmpty {
+                    Section("Dossier") {
+                        Picker("Dossier", selection: $selectedFolder) {
+                            Text("Sans dossier").tag(DocumentFolder?.none)
+                            ForEach(sortedFolders) { folder in
+                                Label(folder.name, systemImage: "folder.fill")
+                                    .tag(Optional(folder))
+                            }
+                        }
+                    }
+                }
+
                 Section("Notes") {
                     TextField("Notes…", text: $notes, axis: .vertical)
                         .lineLimit(3...6)
@@ -91,6 +111,9 @@ struct AddDocumentView: View {
             category = doc.category
             date = doc.date
             notes = doc.notes ?? ""
+            selectedFolder = doc.folder
+        } else {
+            selectedFolder = preselectedFolder
         }
     }
 
@@ -100,6 +123,7 @@ struct AddDocumentView: View {
             doc.category = category.isEmpty ? "Autre" : category
             doc.date = date
             doc.notes = notes.isEmpty ? nil : notes
+            doc.folder = selectedFolder
             try? context.save()
         } else {
             let doc = Document(
@@ -111,6 +135,7 @@ struct AddDocumentView: View {
                 notes: notes.isEmpty ? nil : notes
             )
             doc.dog = dog
+            doc.folder = selectedFolder
             dog.documents = (dog.documents ?? []) + [doc]
             context.insert(doc)
             try? context.save()

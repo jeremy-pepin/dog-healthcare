@@ -47,3 +47,10 @@ dog-healthcare/
 - Les photos et documents sont stockés en **external storage** SwiftData
 - L'onboarding s'affiche automatiquement si aucun chien n'est enregistré (`dogs.isEmpty`)
 - Composants UI réutilisables : `GlassCard` (`.regularMaterial`), `CountdownBadge`, `SectionHeader`
+
+## Mode sombre
+
+- Toujours tester les composants en mode clair **et** sombre avant de livrer
+- Dans un contexte `ContentUnavailableView { actions: }`, utiliser **`.buttonStyle(.bordered)`** et non `.borderedProminent` : iOS n'applique pas le contraste texte/fond de `.borderedProminent` dans ce contexte, rendant le texte invisible en mode sombre
+- Éviter les couleurs fixes (`Color.white`, `Color.black`) pour les textes — préférer `.primary`, `.secondary` ou les semantic colors (`Color(.label)`, `Color(.systemBackground)`)
+- Les materials (`.regularMaterial`, `.ultraThinMaterial`) s'adaptent automatiquement : les privilégier pour les fonds de cartes et overlays
