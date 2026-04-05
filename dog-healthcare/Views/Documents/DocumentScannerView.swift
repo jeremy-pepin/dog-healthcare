@@ -36,9 +36,14 @@ struct DocumentScannerView: UIViewControllerRepresentable {
                 }
             }
             if let data = pdf.dataRepresentation() {
+                // On appelle onScan qui met showScanner = false →
+                // SwiftUI gère seul la fermeture du fullScreenCover (+ onDismiss).
+                // Ne pas appeler controller.dismiss ici : double-dismiss = onDismiss ne se déclenche pas.
                 onScan(data)
+            } else {
+                onCancel()
+                controller.dismiss(animated: true)
             }
-            controller.dismiss(animated: true)
         }
 
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {

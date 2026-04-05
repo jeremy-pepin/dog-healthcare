@@ -10,6 +10,7 @@ final class Document {
     @Attribute(.externalStorage) var data: Data?
     var notes: String?
     var dog: Dog?
+    var folder: DocumentFolder?
 
     init(title: String, category: String, date: Date, fileType: String, data: Data? = nil, notes: String? = nil) {
         self.title = title

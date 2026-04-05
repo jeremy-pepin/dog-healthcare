@@ -23,7 +23,8 @@ struct dog_healthcareApp: App {
             CustomEvent.self,
             Reminder.self,
             Veterinarian.self,
-            Document.self
+            Document.self,
+            DocumentFolder.self
         ])
         do {
             let config = ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)
