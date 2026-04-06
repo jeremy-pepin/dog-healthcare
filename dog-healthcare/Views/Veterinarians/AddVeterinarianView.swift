@@ -21,8 +21,8 @@ struct AddVeterinarianView: View {
         NavigationStack {
             Form {
                 Section("Identité") {
-                    TextField("Nom du vétérinaire", text: $name)
                     TextField("Cabinet / Clinique", text: $clinic)
+                    TextField("Nom du vétérinaire", text: $name)
                 }
                 Section("Contact") {
                     TextField("Téléphone", text: $phone)

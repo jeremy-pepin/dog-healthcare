@@ -6,6 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E696D7A82F83DBF90024E7D2 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		E61126C42F7800E600A6EF25 /* dog-healthcare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "dog-healthcare.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -68,6 +84,7 @@
 				E61126C02F7800E600A6EF25 /* Sources */,
 				E61126C12F7800E600A6EF25 /* Frameworks */,
 				E61126C22F7800E600A6EF25 /* Resources */,
+				E696D7A82F83DBF90024E7D2 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -108,6 +125,8 @@
 			);
 			mainGroup = E61126BB2F7800E600A6EF25;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E61126C52F7800E600A6EF25 /* Products */;
 			projectDirPath = "";
@@ -466,6 +485,7 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
 	};
 	rootObject = E61126BC2F7800E600A6EF25 /* Project object */;
 }

@@ -16,7 +16,7 @@ struct AddCustomEventView: View {
     private var isEditing: Bool { existingEvent != nil }
 
     private let suggestedCategories = [
-        "Toilettage", "Kinésithérapie", "Garde", "Autre"
+        "Toilettage", "Kiné", "Garde", "Autre"
     ]
 
     var body: some View {

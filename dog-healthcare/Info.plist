@@ -8,7 +8,7 @@
 	<array>
 		<string>fr</string>
 	</array>
-	<key>UIBackgroundModes</key>
+<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 	</array>

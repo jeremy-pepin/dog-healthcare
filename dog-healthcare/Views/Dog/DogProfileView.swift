@@ -14,50 +14,48 @@ struct DogProfileView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                GlassCard(solidBackground: Color(white: 0.13)) {
-                    HStack(spacing: 16) {
-                        PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                            dogPhoto
-                        }
-                        .onChange(of: selectedPhoto) {
-                            Task {
-                                if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
-                                    withAnimation(.spring(duration: 0.4)) {
-                                        dog.photoData = data
-                                    }
-                                    try? context.save()
+            List {
+                    Section {
+                        GlassCard(solidBackground: Color(white: 0.13)) {
+                            HStack(spacing: 16) {
+                                PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                                    dogPhoto
                                 }
+                                .onChange(of: selectedPhoto) {
+                                    Task {
+                                        if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
+                                            withAnimation(.spring(duration: 0.4)) {
+                                                dog.photoData = data
+                                            }
+                                            try? context.save()
+                                        }
+                                    }
+                                }
+
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(dog.name)
+                                        .font(.title2.bold())
+                                    if !dog.breed.isEmpty {
+                                        Text(dog.breed)
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    HStack(spacing: 16) {
+                                        Label(dog.age, systemImage: "birthday.cake.fill")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                        Label(dog.dateOfBirth.formatted(.dateTime.day().month(.wide).year().locale(Self.french)), systemImage: "calendar")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+
+                                Spacer()
                             }
                         }
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(dog.name)
-                                .font(.title2.bold())
-                            if !dog.breed.isEmpty {
-                                Text(dog.breed)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-
-                        Spacer()
-                    }
-                }
-                .environment(\.colorScheme, .dark)
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 4)
-
-                List {
-                    Section("Informations") {
-                        LabeledContent("Date de naissance") {
-                            Text(dog.dateOfBirth.formatted(.dateTime.day().month(.wide).year().locale(Self.french)))
-                                .foregroundStyle(.secondary)
-                        }
-                        LabeledContent("Âge") {
-                            Text(dog.age)
-                                .foregroundStyle(.secondary)
-                        }
+                        .environment(\.colorScheme, .dark)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
+                        .listRowBackground(Color.clear)
                     }
 
                     Section("Poids") {
@@ -87,9 +85,7 @@ struct DogProfileView: View {
                             }
                         }
                     }
-                }
             }
-            .background(Color(.systemGroupedBackground))
             .navigationTitle("Profil")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {

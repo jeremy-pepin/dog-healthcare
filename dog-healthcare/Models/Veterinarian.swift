@@ -22,7 +22,7 @@ final class Veterinarian {
     }
 
     var displayName: String {
-        if let clinic { return "\(name) — \(clinic)" }
+        if let clinic { return "\(clinic) — \(name)" }
         return name
     }
 }

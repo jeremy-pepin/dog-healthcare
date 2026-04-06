@@ -26,7 +26,7 @@ struct WeightHistoryView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(String(format: "%.1f kg", entry.value))
                                     .font(.headline)
-                                Text(entry.date.relativeDateFR)
+                                Text(entry.date.fullDateWithYearFR)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }

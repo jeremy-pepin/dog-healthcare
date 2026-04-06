@@ -46,27 +46,20 @@ struct AddVetEventView: View {
                             }
                         }
 
-                        if let vet = selectedVet, vet.clinic != nil || vet.phone != nil {
-                            VStack(alignment: .leading, spacing: 4) {
-                                if let clinic = vet.clinic {
-                                    Label(clinic, systemImage: "building.2.fill")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                if let phone = vet.phone {
-                                    Label(phone, systemImage: "phone.fill")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            .padding(.vertical, 2)
+                        if let vet = selectedVet, let clinic = vet.clinic {
+                            Label(clinic, systemImage: "building.2.fill")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .padding(.vertical, 2)
                         }
 
-                        Button {
-                            showAddVet = true
-                        } label: {
-                            Label("Ajouter un vétérinaire...", systemImage: "plus.circle")
-                                .font(.subheadline)
+                        if selectedVet == nil {
+                            Button {
+                                showAddVet = true
+                            } label: {
+                                Label("Ajouter un vétérinaire...", systemImage: "plus.circle")
+                                    .font(.subheadline)
+                            }
                         }
                     }
                 }
