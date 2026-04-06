@@ -105,7 +105,8 @@ struct WeightChartView: View {
                             .gesture(
                                 DragGesture(minimumDistance: 0)
                                     .onChanged { value in
-                                        let plotOrigin = geo[proxy.plotAreaFrame].origin
+                                        guard let plotFrame = proxy.plotFrame else { return }
+                                    let plotOrigin = geo[plotFrame].origin
                                         let xInPlot = value.location.x - plotOrigin.x
                                         if let date: Date = proxy.value(atX: xInPlot) {
                                             selectedEntry = sorted.min(by: {
