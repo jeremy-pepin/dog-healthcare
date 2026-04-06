@@ -19,10 +19,13 @@ struct VeterinarianListView: View {
             } else {
                 List {
                     ForEach(vets) { vet in
-                        VeterinarianRowView(vet: vet)
-                            .contentShape(Rectangle())
-                            .onTapGesture { vetToEdit = vet }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button { vetToEdit = vet } label: {
+                            VeterinarianRowView(vet: vet)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     context.delete(vet)
                                 } label: {
@@ -72,12 +75,15 @@ private struct VeterinarianRowView: View {
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(vet.name)
-                    .font(.headline)
                 if let clinic = vet.clinic {
                     Text(clinic)
+                        .font(.headline)
+                    Text(vet.name)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                } else {
+                    Text(vet.name)
+                        .font(.headline)
                 }
                 if let phone = vet.phone {
                     Label(phone, systemImage: "phone.fill")

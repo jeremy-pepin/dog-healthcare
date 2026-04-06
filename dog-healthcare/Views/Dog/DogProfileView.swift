@@ -31,11 +31,20 @@ struct DogProfileView: View {
                             }
                         }
 
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 6) {
                             Text(dog.name)
                                 .font(.title2.bold())
                             if !dog.breed.isEmpty {
                                 Text(dog.breed)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                            HStack(spacing: 16) {
+                                Label(dog.age, systemImage: "birthday.cake.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Label(dog.dateOfBirth.formatted(.dateTime.day().month(.wide).year().locale(Self.french)), systemImage: "calendar")
+                                    .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -49,17 +58,6 @@ struct DogProfileView: View {
                 .padding(.bottom, 4)
 
                 List {
-                    Section("Informations") {
-                        LabeledContent("Date de naissance") {
-                            Text(dog.dateOfBirth.formatted(.dateTime.day().month(.wide).year().locale(Self.french)))
-                                .foregroundStyle(.secondary)
-                        }
-                        LabeledContent("Âge") {
-                            Text(dog.age)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
                     Section("Poids") {
                         NavigationLink {
                             WeightHistoryView(dog: dog)

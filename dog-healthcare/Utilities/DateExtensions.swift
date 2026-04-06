@@ -65,6 +65,10 @@ extension Date {
         formatted(.dateTime.day().month(.wide).locale(Self.french))
     }
 
+    var fullDateWithYearFR: String {
+        formatted(.dateTime.day().month(.wide).year().locale(Self.french))
+    }
+
     var fullDateTimeFR: String {
         formatted(.dateTime.day().month(.wide).hour().minute().locale(Self.french))
     }
