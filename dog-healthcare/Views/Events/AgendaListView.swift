@@ -55,23 +55,21 @@ struct AgendaListView: View {
 
     var body: some View {
         List {
-            if !isSearching {
-                Section {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(EventFilter.allCases, id: \.self) { f in
-                                FilterBadge(label: f.rawValue, icon: f.systemImage, isSelected: filter == f) {
-                                    withAnimation(.spring(duration: 0.25)) { filter = f }
-                                }
+            Section {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(EventFilter.allCases, id: \.self) { f in
+                            FilterBadge(label: f.rawValue, icon: f.systemImage, isSelected: filter == f) {
+                                withAnimation(.spring(duration: 0.25)) { filter = f }
                             }
                         }
-                        .padding(.vertical, 4)
                     }
+                    .padding(.vertical, 4)
                 }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                .listRowSeparator(.hidden)
             }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+            .listRowSeparator(.hidden)
 
             if groupedEvents.isEmpty {
                 ContentUnavailableView {
@@ -115,7 +113,6 @@ struct AgendaListView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .animation(.easeInOut(duration: 0.2), value: isSearching)
         .animation(.spring(duration: 0.3), value: filter)
         .sheet(item: $vetEventToEdit) { (event: VetEvent) in
             AddVetEventView(dog: dog, viewModel: viewModel, existingEvent: event)
