@@ -18,10 +18,11 @@ final class NotificationManager {
             }
     }
 
-    func scheduleEventNotification(id: String, title: String, body: String, date: Date) {
+    func scheduleEventNotification(id: String, title: String, subtitle: String = "", body: String, date: Date) {
         guard date > .now else { return }
         let content = UNMutableNotificationContent()
         content.title = title
+        content.subtitle = subtitle
         content.body = body
         content.sound = .default
 
@@ -48,10 +49,12 @@ final class NotificationManager {
 
     func scheduleVetEventNotification(_ event: VetEvent) {
         let notifDate = event.date.addingTimeInterval(-3600)
+        let vetName = event.veterinarian?.name ?? event.vetName
         scheduleEventNotification(
             id: event.notificationID,
-            title: "Rendez-vous : \(event.title)",
-            body: "Dans 1 heure\(event.vetName.map { " chez \($0)" } ?? "")",
+            title: event.title,
+            subtitle: event.date.relativeDateTimeFR,
+            body: vetName.map { "chez \($0)" } ?? "",
             date: notifDate
         )
     }
@@ -60,8 +63,9 @@ final class NotificationManager {
         let notifDate = event.date.addingTimeInterval(-3600)
         scheduleEventNotification(
             id: event.notificationID,
-            title: "\(event.category) : \(event.title)",
-            body: "Dans 1 heure",
+            title: event.title,
+            subtitle: event.date.relativeDateTimeFR,
+            body: "",
             date: notifDate
         )
     }
