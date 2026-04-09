@@ -38,23 +38,44 @@ final class NotificationManager {
 
     func scheduleReminderNotification(_ reminder: Reminder) {
         guard reminder.isActive, let nextDue = reminder.nextDueDate else { return }
-        cancel(id: reminder.notificationID)
-        scheduleEventNotification(
-            id: reminder.notificationID,
-            title: reminder.title,
-            body: "Il est temps de renouveler : \(reminder.title)",
-            date: nextDue
+
+        // Annule les notifs existantes (ancien ID + nouveaux suffixes)
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [reminder.notificationID, reminder.notificationID + "_week", reminder.notificationID + "_day"]
         )
+
+        // 1 semaine avant à 9h
+        if let weekBefore = Calendar.current.date(byAdding: .day, value: -7, to: nextDue) {
+            scheduleEventNotification(
+                id: reminder.notificationID + "_week",
+                title: reminder.title,
+                body: "dans 7 jours",
+                date: at9h(weekBefore)
+            )
+        }
+
+        // Le jour J à 9h
+        scheduleEventNotification(
+            id: reminder.notificationID + "_day",
+            title: reminder.title,
+            body: "aujourd'hui",
+            date: at9h(nextDue)
+        )
+    }
+
+    private func at9h(_ date: Date) -> Date {
+        var comps = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        comps.hour = 9
+        comps.minute = 0
+        return Calendar.current.date(from: comps) ?? date
     }
 
     func scheduleVetEventNotification(_ event: VetEvent) {
         let notifDate = event.date.addingTimeInterval(-3600)
-        let vetName = event.veterinarian?.name ?? event.vetName
         scheduleEventNotification(
             id: event.notificationID,
             title: event.title,
-            subtitle: event.date.relativeDateTimeFR,
-            body: vetName.map { "chez \($0)" } ?? "",
+            body: event.date.relativeDateTimeFR,
             date: notifDate
         )
     }
@@ -64,8 +85,7 @@ final class NotificationManager {
         scheduleEventNotification(
             id: event.notificationID,
             title: event.title,
-            subtitle: event.date.relativeDateTimeFR,
-            body: "",
+            body: event.date.relativeDateTimeFR,
             date: notifDate
         )
     }
