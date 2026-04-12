@@ -32,7 +32,7 @@ struct WeightChartView: View {
                 Group {
                     if let entry = selectedEntry {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(String(format: "%.1f kg", entry.value))
+                            Text(String(format: "%.2f kg", entry.value))
                                 .font(.title2.bold())
                                 .foregroundStyle(.primary)
                             Text(entry.date.fullDateWithYearFR)

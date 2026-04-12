@@ -69,7 +69,7 @@ struct AddWeightView: View {
             }
             .onAppear {
                 if let entry = existingEntry {
-                    weight = String(format: "%.1f", entry.value).replacingOccurrences(of: ".", with: ",")
+                    weight = String(format: "%.2f", entry.value).replacingOccurrences(of: ".", with: ",")
                     date = entry.date
                     note = entry.note ?? ""
                 }
