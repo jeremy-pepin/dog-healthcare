@@ -24,7 +24,7 @@ struct WeightHistoryView: View {
                     ForEach((dog.weightEntries ?? []).sorted { $0.date > $1.date }) { entry in
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(String(format: "%.1f kg", entry.value))
+                                Text(String(format: "%.2f kg", entry.value))
                                     .font(.headline)
                                 Text(entry.date.fullDateWithYearFR)
                                     .font(.caption)

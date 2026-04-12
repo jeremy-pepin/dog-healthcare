@@ -189,7 +189,7 @@ struct MiniReminderCard: View {
                         .font(.subheadline.weight(.semibold))
 
                     if let next = reminder?.nextDueDate {
-                        Text("Prochain : \(next.fullDateFR)")
+                        Text("Prochain : \(next.relativeDateFR)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
@@ -299,7 +299,7 @@ struct UrgentReminderRow: View {
                     Text(reminder.title)
                         .font(.subheadline.weight(.semibold))
                     if let next = reminder.nextDueDate {
-                        Text("Prochain : \(next.fullDateFR)")
+                        Text("Prochain : \(next.relativeDateFR)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -384,9 +384,9 @@ struct WeightChipCard: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if let entry = (dog.weightEntries ?? []).sorted(by: { $0.date > $1.date }).first {
-                            Text(String(format: "%.1f kg", entry.value))
+                            Text(String(format: "%.2f kg", entry.value))
                                 .font(.title3.bold())
-                            Text(entry.date.fullDateFR)
+                            Text(entry.date.relativeDateFR)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
